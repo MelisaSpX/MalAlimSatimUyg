@@ -1,3 +1,16 @@
+/*
+Bu bir Mal Alim-Satim uygulamasidir.Kullanicilar ad,soyad,kart bilgilerini girdikten sonra hangi mali yukleyeceklerini sisteme girerler.
+Urunler İyiden kotuye olmak uzere A-B-C kategorisine ayrilmistir.
+Kullaniciya ilgili dolum birimlerine yönlendirip tarti1 e girmesi ekrana yazdilir.
+Mali yuklediyse tarti2 ye girmesi ekrana yazdilir.
+Net sonuc belirlenir.
+Baska islem yapmak istiyor mu sorulur bu kısayoldur.
+İslemleri sonlanınca alacakli tutar ekrana yazdilir.
+Odeme istenirse odeme yapilir.İstemezse hafizada tutulur.
+Odeme aldiktan sonra bi kez daha kullanıcı/islem ekleme sorulur.
+Kullanici daha fazla islem yapmak istemezse program sonlanir...
+*/
+
 #include <stdio.h>
 #include <string.h>
 
