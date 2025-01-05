@@ -1,0 +1,271 @@
+/*
+Bu bir Mal Alim-Satim uygulamasidir.
+Kullanicilar ad,soyad,kart bilgilerini girdikten sonra hangi mali yukleyeceklerini sisteme girerler.
+Urunler İyiden kotuye olmak uzere A-B-C kategorisine ayrilmistir.
+Kullaniciya ilgili dolum birimlerine yönlendirip tarti1 e girmesi ekrana yazdilir.
+Mali yuklediyse tarti2 ye girmesi ekrana yazdilir.
+Net sonuc belirlenir.
+Baska islem yapmak istiyor mu sorulur bu kısayoldur.
+İslemleri sonlanınca alacakli tutar ekrana yazdilir.
+Odeme istenirse odeme yapilir.İstemezse hafizada tutulur
+.Odeme aldiktan sonra bi kez daha kullanıcı/islem ekleme sorulur.
+Kullanici daha fazla islem yapmak istemezse
+Dosyalama yöntemiyle toplam kullanici sayisi ekrana görüntülenir
+Program sonlanir...
+*/
+
+
+
+// GitHub adresi : https://github.com/MelisaSpX/MalAlimSatimUyg/blob/main/finalproje.dev
+
+
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_USERS 100
+#define FILENAME "veriler.txt"  // Kullanıcı bilgilerini kaydedeceğimiz dosya
+
+// Kullanıcı bilgileri
+typedef struct {
+    char ad[50];
+    char soyad[50];
+    char kartNo[20];
+} Kullanici;
+
+void kullaniciBilgileriAl(Kullanici *kullanici);
+int kartNoKontrol(char *kartNo);
+float fiyatHesapla();
+void dolumNoktasiYazdir(const char *urunKodu);
+float tartiUygulamasi();
+void odemeAl(float toplamFiyat);
+void dosyayaYaz(Kullanici kullanicilar[], int kullaniciSayisi);
+void dosyadanOku(Kullanici *kullanicilar, int *kullaniciSayisi);
+void toplamKullaniciSayisiGoster();
+
+
+void kullaniciBilgileriAl(Kullanici *kullanici) {
+    printf("Adinizi giriniz: ");
+    fgets(kullanici->ad, sizeof(kullanici->ad), stdin);
+    kullanici->ad[strcspn(kullanici->ad, "\n")] = 0;  
+
+    printf("Soyadinizi giriniz: ");
+    fgets(kullanici->soyad, sizeof(kullanici->soyad), stdin);
+    kullanici->soyad[strcspn(kullanici->soyad, "\n")] = 0;
+
+    printf("Kart numaranizi giriniz: ");
+    fgets(kullanici->kartNo, sizeof(kullanici->kartNo), stdin);
+    kullanici->kartNo[strcspn(kullanici->kartNo, "\n")] = 0; 
+}
+
+// Kart numarası 16 haneli olması kontrolü
+int kartNoKontrol(char *kartNo) {
+    if (strlen(kartNo) != 16) {
+        printf("Kart numarasi 16 haneli olmalidir!\n");
+        return 0;
+    }
+    int i;
+    for (i = 0; i < 16; i++) {
+        if (kartNo[i] < '0' || kartNo[i] > '9') {
+            printf("Kart numarasi sadece rakamlardan olusmalidir!\n");
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+// Ürün listesi/fiyatı tanımları
+float fiyatHesapla() {
+    float domatesA = 3.14, domatesB = 2.18, domatesC = 1.02, biberA = 15, biberB = 10, biberC = 4;
+    char secim[10];
+    float toplamFiyat = 0;
+    float net;
+
+    printf("\nURUN LİSTESİ:\n");
+    printf("domatesA - 3.24 TL/kg\n");
+    printf("domatesB - 2.18 TL/kg\n");
+    printf("domatesC - 1.04 TL/kg\n");
+    printf("biberA - 15 TL/kg\n");
+    printf("biberB - 10 TL/kg\n");
+    printf("biberC - 4 TL/kg\n\n");
+
+    while (1) {
+        printf("Bir urun seciniz (domatesA, domatesB, domatesC, biberA, biberB, biberC\n menuden cikmak icin 0 tuslayiniz): ");
+        scanf("%9s", secim);
+
+        if (strcmp(secim, "0") == 0) {
+            break;  
+        }
+
+        net = tartiUygulamasi();
+        if (net <= 0) {
+            continue;  
+        }
+
+        if (strcmp(secim, "domatesA") == 0) {
+            printf("Urun Kodu: TİR-DA\n");
+            dolumNoktasiYazdir("TİR-DA dolum noktasina gidiniz");
+            toplamFiyat += domatesA * net;
+        } else if (strcmp(secim, "domatesB") == 0) {
+            printf("Urun Kodu: TİR-DB\n");
+            dolumNoktasiYazdir("TİR-DB dolum noktasina gidiniz");
+            toplamFiyat += domatesB * net;
+        } else if (strcmp(secim, "domatesC") == 0) {
+            printf("Urun Kodu: TİR-DC\n");
+            dolumNoktasiYazdir("TİR-DC dolum noktasina gidiniz");
+            toplamFiyat += domatesC * net;
+        } else if (strcmp(secim, "biberA") == 0) {
+            printf("Urun Kodu: TİR-BA\n");
+            dolumNoktasiYazdir("TİR-BA dolum noktasina gidiniz");
+            toplamFiyat += biberA * net;
+        } else if (strcmp(secim, "biberB") == 0) {
+            printf("Urun Kodu: TİR-BB\n");
+            dolumNoktasiYazdir("TİR-BB dolum noktasina gidiniz");
+            toplamFiyat += biberB * net;
+        } else if (strcmp(secim, "biberC") == 0) {
+            printf("Urun Kodu: TİR-BC\n");
+            dolumNoktasiYazdir("TİR-BC dolum noktasina gidiniz");
+            toplamFiyat += biberC * net;
+        } else {
+            printf("Gecersiz islem yaptiniz!\n");
+            continue;
+        }
+    }
+
+    return toplamFiyat;
+}
+
+void dolumNoktasiYazdir(const char *urunKodu) {
+    printf("Dolum Noktasi: %s\n", urunKodu);
+}
+
+// Tartı uygulamaları
+float tartiUygulamasi() {
+    float tarti1, tarti2, net;
+
+    printf("Lutfen Tarti 1'e giriniz.\n");
+    printf("Tarti 1 sonucu (kg): ");
+    scanf("%f", &tarti1);
+
+    printf("Dolum noktasinda malinizi tira yuklediniz mi? (E/e: Evet): ");
+    char dolum;
+    scanf(" %c", &dolum);
+
+    if (dolum == 'E' || dolum == 'e') {
+        printf("Lutfen Tarti 2'ye giriniz.\n");
+        printf("Tarti 2 sonucu (kg): ");
+        scanf("%f", &tarti2);
+
+        net = tarti1 - tarti2;
+        printf("Net sonuc: %.2f kg\n", net);
+        return net;
+    } else {
+        printf("Dolum islemi henuz tamamlanmadi.Lutfen bekleyiniz.\n");
+        return 0;
+    }
+}
+
+// Ödeme işlemleri
+void odemeAl(float toplamFiyat) {
+    char odemeSecim;
+
+    printf("Toplam alacakli oldugunuz odeme: %.2f TL\n", toplamFiyat);
+    printf("Odeme almak ister misiniz? (E/e: Evet, H/h: Hayır): ");
+    scanf(" %c", &odemeSecim);
+
+    if (odemeSecim == 'E' || odemeSecim == 'e') {
+        printf("Odemeniz basariyla gerçeklesti.\n");
+    } else {
+        printf("Odemeniz basarisiz.\n");
+    }
+}
+
+// Dosyadan mevcut kullanıcıları okuma
+void dosyadanOku(Kullanici *kullanicilar, int *kullaniciSayisi) {
+    FILE *dosya = fopen(FILENAME, "r");
+    if (dosya != NULL) {
+        while (fscanf(dosya, "%s %s %s\n", kullanicilar[*kullaniciSayisi].ad, kullanicilar[*kullaniciSayisi].soyad, kullanicilar[*kullaniciSayisi].kartNo) == 3) {
+            (*kullaniciSayisi)++;
+        }
+        fclose(dosya);
+    }
+}
+
+// Dosyaya kullanıcı bilgilerini yazma
+void dosyayaYaz(Kullanici kullanicilar[], int kullaniciSayisi) {
+    FILE *dosya = fopen(FILENAME, "a");
+    if (dosya != NULL) {
+    	int i;
+        for (i = 0; i < kullaniciSayisi; i++) {
+            fprintf(dosya, "%s %s %s\n", kullanicilar[i].ad, kullanicilar[i].soyad, kullanicilar[i].kartNo);
+        }
+        fclose(dosya);
+    }
+}
+
+// Toplam kullanıcı sayısını dosyada göster
+void toplamKullaniciSayisiGoster() {
+    FILE *dosya = fopen(FILENAME, "r");
+    if (dosya == NULL) {
+        printf("Dosya acilamadi!\n");
+        return;
+    }
+
+    int sayac = 0;
+    char ch;
+    while ((ch = fgetc(dosya)) != EOF) {
+        if (ch == '\n') {
+            sayac++;
+        }
+    }
+
+    fclose(dosya);
+    printf("Toplam Kullanici Sayisi: %d\n", sayac);
+}
+
+// Sisteme devam-çıkış işlemleri
+int main() {
+    Kullanici kullanicilar[MAX_USERS];
+    int kullaniciSayisi = 0;
+    char devam;
+
+    // Dosyadaki mevcut kullanıcıları oku
+    dosyadanOku(kullanicilar, &kullaniciSayisi);
+
+    printf("--- Kullanici Bilgi Sistemi ---\n\n");
+
+    do {
+        printf("Kullanici bilgilerini giriniz:\n");
+        kullaniciBilgileriAl(&kullanicilar[kullaniciSayisi]);
+
+        if (kartNoKontrol(kullanicilar[kullaniciSayisi].kartNo)) {
+            printf("Bilgiler basariyla kaydedildi.\n\n");
+
+            kullaniciSayisi++;
+
+            printf("İsleme devam ediliyor.\n");
+            float toplamFiyat = fiyatHesapla();
+            if (toplamFiyat > 0) {
+                odemeAl(toplamFiyat);
+            } else {
+                printf("Ürün secimi gecersiz veya islem yapılmadı.\n");
+            }
+        } else {
+            printf("Hatali bilgiler girildi,Lutfen tekrar deneyiniz.\n\n");
+        }
+
+        printf("Baska bir kullanici/islem eklemek istiyor musunuz? (E/e: Evet, H/h: Hayır): ");
+        scanf(" %c", &devam);
+
+    } while (devam == 'E' || devam == 'e');
+
+    // Kullanıcı bilgilerini dosyaya yaz
+    dosyayaYaz(kullanicilar, kullaniciSayisi);
+
+    // İşlem sonunda toplam kullanıcı sayısını göster
+    printf("\nİslem sonlandiriliyor...\n");
+    toplamKullaniciSayisiGoster();
+
+    return 0;
+}
