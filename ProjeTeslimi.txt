@@ -16,7 +16,7 @@ Program sonlanir...
 
 
 
-// GitHub adresi : https://github.com/MelisaSpX/MalAlimSatimUyg/commit/979904955cbce4e9e6551bfd265c99f5c573195f
+// GitHub adresi : https://github.com/MelisaSpX/MalAlimSatimUyg/blob/main/ProjeTeslimi.txt
 
 
 
